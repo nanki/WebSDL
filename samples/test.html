@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <title>test</title>
+    <script src="./jquery.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      var canvas = document.getElementById("canvas");
+      var context = canvas.getContext('2d');
+
+      var postCanvas = function(cmds) {
+        var s = [];
+        for (var i = 0; i < cmds.length; i++) {
+          var cmd = cmds[i];
+          switch(cmd) {
+            case 'strokeRect':
+              context.strokeRect.apply(context, s.splice(-4));
+              break;
+            case 'fillRect':
+              context.fillRect.apply(context, s.splice(-4));
+              break;
+            case 'strokeStyle':
+              context.strokeStyle = s.pop();
+              break;
+            case 'fillStyle':
+              context.fillStyle = s.pop();
+              break;
+            case 'setDimension':
+              canvas.setAttribute("height", s.pop());
+              canvas.setAttribute("width", s.pop());
+              break;
+            default:
+              s.push(cmd);
+          }
+        }
+      }
+
+      var ws = new WebSocket("ws://localhost:3000/");
+
+      ws.onmessage = function(msg) {
+        postCanvas(msg.data.split(":"));
+      }
+
+      $(canvas).mousemove(function(e) {
+        var pos = $(canvas).position();
+        ws.send(["MouseMotion", e.pageX - pos.left, e.pageY - pos.top].join(':'));
+      });
+    </script>
+  </body>
+</html>
