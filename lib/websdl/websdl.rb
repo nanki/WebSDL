@@ -1,7 +1,6 @@
 module WebSDL
   class << self
     def run(klass, options={})
-      screens = {}
       frames = []
       EM.run(
         EM::WebSocket.start(options) do |socket|
@@ -10,10 +9,8 @@ module WebSDL
           frames << f
           f.frames = frames
 
-
           socket.onopen do
             EventMachine::add_periodic_timer(0.1) {
-              screens[socket] = screen
               screen.socket = socket
               Event.lock(socket) {
                 f.mainloop(screen)
