@@ -28,6 +28,9 @@ module WebSDL
             }
           end
 
+          socket.onclose do
+            frames.delete f
+          end
         end
       )
     end
